@@ -9,12 +9,36 @@ import SwiftUI
 
 @main
 struct DUDDApp: App {
-    let persistenceController = PersistenceController.shared
+    @StateObject var StreamsVM = StreamsViewModel()
+//    let persistenceController = PersistenceController.shared
+
+//    ContentView()
+//        .environment(\.managedObjectContext, persistenceController.container.viewContext)
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            HomeView()
+                .environmentObject(StreamsVM)
         }
     }
+}
+
+private extension View {
+    func withHostingWindow(_ callback: @escaping (UIWindow?) -> Void) -> some View {
+        background(HostingWindowFinder(callback: callback))
+    }
+}
+
+private struct HostingWindowFinder: UIViewRepresentable {
+    var callback: (UIWindow?) -> Void
+
+    func makeUIView(context _: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.async { [weak view] in
+            self.callback(view?.window)
+        }
+        return view
+    }
+
+    func updateUIView(_: UIView, context _: Context) {}
 }
